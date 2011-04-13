@@ -7,7 +7,8 @@ A NodeJS binding for [Google CityHash](http://code.google.com/p/cityhash/).
 ### Install ###
 
 Run:
-    ./install.sh
+
+	./install.sh
 
 ### Functions ###
 
