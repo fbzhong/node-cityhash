@@ -6,12 +6,18 @@ A NodeJS binding for [Google CityHash](http://code.google.com/p/cityhash/).
 
 ### Install ###
 
-Dependency:
+Node-CityHash depends on Google CityHash, please install it first. For more information, please refer to [README](http://code.google.com/p/cityhash/source/browse/trunk/README)
 
-	[Google CityHash](http://code.google.com/p/cityhash/), more detail please refer to [README](http://code.google.com/p/cityhash/source/browse/trunk/README).
+Install CityHash:
 
-Run:
+	cd ${cityhash dir}
+	./configure --enable-sse4.2
+	make all check CXXFLAGS="-g -O3 -msse4.2"
+	sudo make install
 
+Install Node-CityHash:
+
+	cd ${node-cityhash dir}
 	make
 
 ### Functions ###
