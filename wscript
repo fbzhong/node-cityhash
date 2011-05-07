@@ -13,8 +13,11 @@ def configure(conf):
   conf.env.append_value('CCFLAGS', ['-O3'])
 
 def build(bld):
+  bld.exec_command('./configure', cwd='cityhash')
+
   libcity = bld.new_task_gen("cxx", "shlib")
   libcity.source = "cityhash/src/city.cc"
+  libcity.includes = ["cityhash", "cityhash/src"]
   libcity.name = "libcity"
   libcity.target = "libcity"
 
