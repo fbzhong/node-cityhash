@@ -1,5 +1,7 @@
 var cityhash = require('./build/default/cityhash.node');
 
+var passed = true;
+
 function assertEqual(expected, actual, message) {
     if(expected != actual) {
         if(message) {
@@ -7,8 +9,14 @@ function assertEqual(expected, actual, message) {
         } else {
             message = '';
         }
-
+        passed = false;
         console.log('[Error]' + message + 'Expected ' + expected + ' , but actual is ' + actual);
+    }
+}
+
+function end() {
+    if(passed) {
+        console.log('All tests are passed.');
     }
 }
 
@@ -20,3 +28,7 @@ assertEqual('16267654833214665223', cityhash.hash64('Hello', 87392039, 1230234),
 assertEqual('9138004313465017137,12242971252332641544', cityhash.hash128('Hello'), 'Hash128 for "Hello"');
 assertEqual('13523890104784088047,17404193039403234796', cityhash.hash128('hello'), 'Hash128 for "hello"');
 assertEqual('15779891233746910938,15118107765960464233', cityhash.hash128('Hello', '12343,30293'), 'Hash128 for "Hello" with seed 12343,30293');
+
+assertEqual('9138004313465017137,12242971252332641544', cityhash.crc128('Hello'), 'Crc128 for "Hello"');
+
+end();
