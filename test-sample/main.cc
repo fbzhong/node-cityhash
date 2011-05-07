@@ -27,6 +27,9 @@ int main (int argc, const char * argv[])
     hash = CityHashCrc128("Hello", strlen("Hello"));
     std::cout << "CityHashCrc128(\"Hello\") : " << hash.first << "," << hash.second << std::endl;
 
+    hash = CityHashCrc128WithSeed("Hello", strlen("Hello"), seed);
+    std::cout << "CityHashCrc128WithSeed(\"Hello\") : " << hash.first << "," << hash.second << std::endl;
+
     return 0;
 }
 

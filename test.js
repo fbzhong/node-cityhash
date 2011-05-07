@@ -30,5 +30,6 @@ assertEqual('13523890104784088047,17404193039403234796', cityhash.hash128('hello
 assertEqual('15779891233746910938,15118107765960464233', cityhash.hash128('Hello', '12343,30293'), 'Hash128 for "Hello" with seed 12343,30293');
 
 assertEqual('9138004313465017137,12242971252332641544', cityhash.crc128('Hello'), 'Crc128 for "Hello"');
+assertEqual('15779891233746910938,15118107765960464233', cityhash.crc128('Hello', '12343,30293'), 'Crc128 for "Hello" with seed 12343,30293');
 
 end();
