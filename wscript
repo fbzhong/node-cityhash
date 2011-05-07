@@ -10,19 +10,11 @@ def configure(conf):
   conf.check_tool("compiler_cxx")
   conf.check_tool("compiler_cc")
   conf.check_tool("node_addon")
-  conf.env.append_value('CCFLAGS', ['-O3'])
+  conf.check(lib='cityhash', libpath=['/usr/lib', '/usr/local/lib'], uselib_store='libcityhash')
+
 
 def build(bld):
-  bld.exec_command('./configure', cwd='cityhash')
-
-  libcity = bld.new_task_gen("cxx", "shlib")
-  libcity.source = "cityhash/src/city.cc"
-  libcity.includes = ["cityhash", "cityhash/src"]
-  libcity.name = "libcity"
-  libcity.target = "libcity"
-
   obj = bld.new_task_gen("cxx", "shlib", "node_addon")
   obj.target = "cityhash"
   obj.source = "binding.cc"
-  obj.includes = "libcity"
-  obj.add_objects = "libcity"
+  obj.uselib = "libcityhash"

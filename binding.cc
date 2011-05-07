@@ -21,7 +21,8 @@
 #include <v8.h>
 #include <string.h>
 #include <sstream>
-#include "cityhash/src/city.h"
+#include <city.h>
+#include <citycrc.h>
 
 #define MAX_64_HASH_LEN 21
 #define MAX_128_HASH_LEN MAX_64_HASH_LEN*2
@@ -145,9 +146,38 @@ node_CityHash128(const Arguments& args) {
     return scope.Close(stringify_hash(&hash));
 }
 
+Handle<Value>
+node_CityHashCrc128(const Arguments& args) {
+    HandleScope scope;
+
+    int args_len = args.Length();
+    if(args_len == 0 || args_len > 2) {
+        return ThrowException(String::New("Invalid arguments."));
+    }
+
+    String::Utf8Value data(args[0]->ToString());
+    const char* str = *data;
+    size_t len = data.length();
+
+    uint128 hash;
+
+    if(args.Length() == 2) {
+        uint128 seed;
+        String::AsciiValue seedString(args[1]->ToString());
+        to_uint128(&seed, *seedString, seedString.length());
+
+        hash = CityHashCrc128WithSeed(str, len, seed);
+    } else {
+        hash = CityHashCrc128(str, len);
+    }
+
+    return scope.Close(stringify_hash(&hash));
+}
+
 extern "C" void
 init (Handle<Object> target) {
     HandleScope scope;
     target->Set(String::New("hash64"), FunctionTemplate::New(node_CityHash64)->GetFunction());
     target->Set(String::New("hash128"), FunctionTemplate::New(node_CityHash128)->GetFunction());
+    target->Set(String::New("crc128"), FunctionTemplate::New(node_CityHashCrc128)->GetFunction());
 }
