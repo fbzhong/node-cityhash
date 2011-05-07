@@ -6,9 +6,13 @@ A NodeJS binding for [Google CityHash](http://code.google.com/p/cityhash/).
 
 ### Install ###
 
+Dependency:
+
+	[Google CityHash](http://code.google.com/p/cityhash/), more detail please refer to [README](http://code.google.com/p/cityhash/source/browse/trunk/README).
+
 Run:
 
-	./install.sh
+	make
 
 ### Functions ###
 
@@ -29,6 +33,14 @@ Run:
 	**/
 	function hash128(str, [seed0]);
 
+	/**
+	 * Compute crc for str by CityHashCrc128().
+	 * @param {string} str The string to compute hash.
+	 * @param {unsigned long long} [seed0] The hash seed.
+	 * @return {string} 128-bit hash value, "low64,high64", eg "11793567364161249803,13788582196852422552".
+	**/
+	function crc128(str, [seed0]);
+
 ### Usage ###
 
 	var cityhash = require('node-cityhash');
@@ -48,6 +60,12 @@ Run:
 
 	hash = cityhash.hash128('Hello', '12343,30293');
 	// hash = "9958601979657309277,6783721701693091028"
+
+	hash = cityhash.crc128('Hello');
+	// hash = "9138004313465017137,12242971252332641544"
+
+	hash = cityhash.crc128('Hello', '12343,30293');
+	// hash = "15779891233746910938,15118107765960464233"
 
 ### Benchmark ###
 
