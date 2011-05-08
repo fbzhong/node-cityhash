@@ -43,7 +43,7 @@ function end() {
 }
 
 assertEqual('6596376470467341850', cityhash.stringify({low:1727229466, high:1535838579}), 'Stringify for uint64 object');
-assertEqual({low:1727229466, high:1535838579}, cityhash.objectify('6596376470467341850'), 'Objectify for uint64 hash string');
+assertEqual({low:1727229466, high:1535838579, uint64:true}, cityhash.objectify('6596376470467341850'), 'Objectify for uint64 hash string');
 
 assertEqual('9138004313465017137,12242971252332641544', cityhash.stringify({
             "low": {

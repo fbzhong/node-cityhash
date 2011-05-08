@@ -22,19 +22,33 @@ Install Node-CityHash:
 
 	64-bit hash object:
 	{
-		low:    {unsigned long}, eg 1727229466
-		high:   {unsigned long}, eg 1535838579
+		low:    {unsigned long}, eg 1727229466.
+		high:   {unsigned long}, eg 1535838579.
 		uint64: {boolean} true if hash object is uint64. Otherwise undefined.
-		value:  {string}, eg "6596376470467341850"
+		value:  {string}, eg "6596376470467341850".
 	}
 
 	128-bit hash object:
 	{
-		low:     {64-bit hash object}
-		high:    {64-bit hash object}
+		low:     {64-bit hash object}.
+		high:    {64-bit hash object}.
 		uint128: {boolean} true if hash object is uint128. Otherwise undefined.
-		value:   {string}, "low64,high64", eg "9138004313465017137,12242971252332641544"
+		value:   {string}, "low64,high64", eg "9138004313465017137,12242971252332641544".
 	}
+
+	/**
+	 * convert string or number to hash object.
+	 * @param {unsigned long long | string} the string or number to be convered to hash object.
+	 * @return {hash} 64-bit hash object or 128-bit hash object.
+	**/
+	function objectify(obj);
+
+	/**
+	 * stringify the hash object.
+	 * @param {hash} 64-bit hash object or 128-bit hash object.
+	 * @return {string} the hash string value, eg "6596376470467341850" or "9138004313465017137,12242971252332641544".
+	**/
+	function stringify(obj);
 
 	/**
 	 * Compute hash for str by CityHash64().
@@ -65,6 +79,12 @@ Install Node-CityHash:
 
 	var cityhash = require('node-cityhash');
 	var hash;
+
+	hash = cityhash.stringify({low:1727229466, high:1535838579});
+	// hash = '6596376470467341850'
+
+	hash = cityhash.objectify('6596376470467341850');
+	// hash = {low: 1727229466, high: 1535838579, uint64: true}
 
 	hash = cityhash.hash64('Hello');
 	// hash = {
