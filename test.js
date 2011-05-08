@@ -219,4 +219,8 @@ assertEqual({
         "uint128": true
     }, cityhash.crc128('Hello', cityhash.objectify('12343,30293')), 'Crc128 for "Hello" with objectify seed 12343,30293');
 
+// since my computer does not support SSE4.2, can not calculate the CRC by CityHashCrc256 algorithm.
+// assertEqual({
+//     }, cityhash.crc256('Hello'), 'Crc256 for "Hello"');
+
 end();
