@@ -59,6 +59,16 @@ to_uint64(const Local<Object> &obj) {
     return HighLow32ToUint64(low->Value(), high->Value());
 }
 
+inline uint64
+to_uint64(const Local<Value> &obj) {
+    if(obj->IsObject()) {
+        return to_uint64(obj->ToObject());
+    } else {
+        String::AsciiValue strObj(obj->ToString());
+        return to_uint64(*strObj, strObj.length());
+    }
+}
+
 void
 to_uint128(uint128* v, const char* data, size_t len) {
     std::stringstream str;
@@ -88,6 +98,16 @@ inline void
 to_uint128(uint128 *v, const Local<Object> &obj) {
     v->first = to_uint64(obj->Get(String::New("low"))->ToObject());
     v->second = to_uint64(obj->Get(String::New("high"))->ToObject());
+}
+
+inline void
+to_uint128(uint128 *v, const Local<Value> &obj) {
+    if(obj->IsObject()) {
+        to_uint128(v, obj->ToObject());
+    } else {
+        String::AsciiValue strObj(obj->ToString());
+        to_uint128(v, *strObj, strObj.length());
+    }
 }
 
 Local<String>
@@ -206,16 +226,12 @@ node_CityHash64(const Arguments& args) {
     if(args_len == 1) {
         hash = CityHash64(str, len);
     } else if(args_len == 2) {
-        String::AsciiValue seedString(args[1]->ToString());
-        uint64 seed = to_uint64(*seedString, seedString.length());
+        uint64 seed = to_uint64(args[1]);
 
         hash = CityHash64WithSeed(str, len, seed);
     } else if(args_len == 3) {
-        String::AsciiValue seed0String(args[1]->ToString());
-        String::AsciiValue seed1String(args[2]->ToString());
-        uint64 seed0 = to_uint64(*seed0String, seed0String.length());
-        uint64 seed1 = to_uint64(*seed1String, seed1String.length());
-
+        uint64 seed0 = to_uint64(args[1]);
+        uint64 seed1 = to_uint64(args[2]);
         hash = CityHash64WithSeeds(str, len, seed0, seed1);
     }
 
@@ -239,8 +255,7 @@ node_CityHash128(const Arguments& args) {
 
     if(args.Length() == 2) {
         uint128 seed;
-        String::AsciiValue seedString(args[1]->ToString());
-        to_uint128(&seed, *seedString, seedString.length());
+        to_uint128(&seed, args[1]);
 
         hash = CityHash128WithSeed(str, len, seed);
     } else {
@@ -267,8 +282,7 @@ node_CityHashCrc128(const Arguments& args) {
 
     if(args.Length() == 2) {
         uint128 seed;
-        String::AsciiValue seedString(args[1]->ToString());
-        to_uint128(&seed, *seedString, seedString.length());
+        to_uint128(&seed, args[1]);
 
         hash = CityHashCrc128WithSeed(str, len, seed);
     } else {

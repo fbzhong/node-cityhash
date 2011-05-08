@@ -87,6 +87,13 @@ assertEqual({
     }, cityhash.hash64('Hello', 87392039), 'Hash64 for "hello" with seed 87392039');
 
 assertEqual({
+        low: 2569634289,
+        high: 3664379964,
+        uint64: true,
+        value: '15738392108067291633'
+    }, cityhash.hash64('Hello', cityhash.objectify(87392039)), 'Hash64 for "hello" with objectify seed 87392039');
+
+assertEqual({
         low: 2389520903,
         high: 3787608545,
         value: '16267654833214665223',
@@ -146,6 +153,23 @@ assertEqual({
 
 assertEqual({
         "low": {
+            "low": 3184066266,
+            "high": 3674042232,
+            "value": "15779891233746910938",
+            "uint64": true
+        },
+        "high": {
+            "low": 4196783977,
+            "high": 3519958761,
+            "value": "15118107765960464233",
+            "uint64": true
+        },
+        "value": "15779891233746910938,15118107765960464233",
+        "uint128": true
+    }, cityhash.hash128('Hello', cityhash.objectify('12343,30293')), 'Hash128 for "Hello" with objectify seed 12343,30293');
+
+assertEqual({
+        "low": {
             "low": 68277041,
             "high": 2127607426,
             "value": "9138004313465017137",
@@ -177,5 +201,22 @@ assertEqual({
         "value": "15779891233746910938,15118107765960464233",
         "uint128": true
     }, cityhash.crc128('Hello', '12343,30293'), 'Crc128 for "Hello" with seed 12343,30293');
+
+assertEqual({
+        "low": {
+            "low": 3184066266,
+            "high": 3674042232,
+            "value": "15779891233746910938",
+            "uint64": true
+        },
+        "high": {
+            "low": 4196783977,
+            "high": 3519958761,
+            "value": "15118107765960464233",
+            "uint64": true
+        },
+        "value": "15779891233746910938,15118107765960464233",
+        "uint128": true
+    }, cityhash.crc128('Hello', cityhash.objectify('12343,30293')), 'Crc128 for "Hello" with objectify seed 12343,30293');
 
 end();
