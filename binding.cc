@@ -29,25 +29,18 @@
 
 using namespace v8;
 
-Local<String>
-stringify_hash(uint64 hash) {
-    // hash to char
-    char buf[MAX_64_HASH_LEN];
-    memset(buf, 0, MAX_64_HASH_LEN);
-    snprintf(buf, MAX_64_HASH_LEN, "%llu", hash);
-
-    return String::New(buf);
+inline uint32 Uint64High32(const uint64 &x) {
+    return (uint32)((x >> 32) & 0xFFFFFFFF);
 }
 
-Local<String>
-stringify_hash(uint128* hash) {
-    // hash to char
-    char buf[MAX_128_HASH_LEN];
-    memset(buf, 0, MAX_128_HASH_LEN);
-    snprintf(buf, MAX_128_HASH_LEN, "%llu,%llu", Uint128Low64(*hash), Uint128High64(*hash));
-
-    return String::New(buf);
+inline uint32 Uint64Low32(const uint64 &x) {
+    return (uint32)x;
 }
+
+inline uint64 HighLow32ToUint64(const uint32 &low, const uint32 &high) {
+    return ((uint64_t)low) + ((((uint64_t)high) << 32) & 0xFFFFFFFF00000000);
+}
+
 
 uint64
 to_uint64(const char* data, size_t len) {
@@ -57,6 +50,13 @@ to_uint64(const char* data, size_t len) {
     uint64 v;
     str >> v;
     return v;
+}
+
+inline uint64
+to_uint64(const Local<Object> &obj) {
+    Local<Uint32> low = obj->Get(String::New("low"))->ToUint32();
+    Local<Uint32> high = obj->Get(String::New("high"))->ToUint32();
+    return HighLow32ToUint64(low->Value(), high->Value());
 }
 
 void
@@ -82,6 +82,110 @@ to_uint128(uint128* v, const char* data, size_t len) {
         str >> i;
         v->second = i;
     }
+}
+
+inline void
+to_uint128(uint128 *v, const Local<Object> &obj) {
+    v->first = to_uint64(obj->Get(String::New("low"))->ToObject());
+    v->second = to_uint64(obj->Get(String::New("high"))->ToObject());
+}
+
+Local<String>
+stringify_hash(const uint64 &hash) {
+    // hash to char
+    char buf[MAX_64_HASH_LEN];
+    memset(buf, 0, MAX_64_HASH_LEN);
+    snprintf(buf, MAX_64_HASH_LEN, "%llu", hash);
+
+    return String::New(buf);
+}
+
+Local<String>
+stringify_hash(const uint128 &hash) {
+    // hash to char
+    char buf[MAX_128_HASH_LEN];
+    memset(buf, 0, MAX_128_HASH_LEN);
+    snprintf(buf, MAX_128_HASH_LEN, "%llu,%llu", Uint128Low64(hash), Uint128High64(hash));
+
+    return String::New(buf);
+}
+
+Local<String>
+stringify_hash(Local<Object> obj) {
+    Local<Value> lowObject = obj->Get(String::New("low"));
+    if(lowObject->IsObject()) {
+        uint128 hash128;
+        to_uint128(&hash128, obj);
+        return stringify_hash(hash128);
+    } else {
+        return stringify_hash(to_uint64(obj));
+    }
+}
+
+Local<Object>
+objectify_hash(const uint64 &hash) {
+    uint32 low = Uint64Low32(hash);
+    uint32 high = Uint64High32(hash);
+
+    Local<Object> ret = Object::New();
+    ret->Set(String::New("low"), Integer::NewFromUnsigned(low));
+    ret->Set(String::New("high"), Integer::NewFromUnsigned(high));
+    ret->Set(String::New("value"), stringify_hash(hash));
+    ret->Set(String::New("uint64"), Boolean::New(true));
+
+    return ret;
+}
+
+Local<Object>
+objectify_hash(const uint128 &hash) {
+    Local<Object> ret = Object::New();
+    ret->Set(String::New("low"), objectify_hash(Uint128Low64(hash)));
+    ret->Set(String::New("high"), objectify_hash(Uint128High64(hash)));
+    ret->Set(String::New("value"), stringify_hash(hash));
+    ret->Set(String::New("uint128"), Boolean::New(true));
+
+    return ret;
+}
+
+Local<Object>
+objectify_hash(const String::AsciiValue &hash) {
+    const char *data = *hash;
+    size_t len = hash.length();
+
+    char *ch = strchr(data, ',');
+    if(ch == NULL) {
+        return objectify_hash(to_uint64(data, len));
+    } else {
+        uint128 hash128;
+        to_uint128(&hash128, data, len);
+        return objectify_hash(hash128);
+    }
+}
+
+Handle<Value>
+node_Stringify(const Arguments& args) {
+    HandleScope scope;
+
+    int args_len = args.Length();
+    if(args_len != 1 || !args[0]->IsObject()) {
+        return ThrowException(String::New("Invalid arguments."));
+    }
+
+    Local<Object> obj = args[0]->ToObject();
+    return scope.Close(stringify_hash(obj));
+}
+
+Handle<Value>
+node_Objectify(const Arguments& args) {
+    HandleScope scope;
+
+    int args_len = args.Length();
+    if(args_len != 1) {
+        return ThrowException(String::New("Invalid arguments."));
+    }
+
+    String::AsciiValue obj(args[0]->ToString());
+    return scope.Close(objectify_hash(obj));
 }
 
 Handle<Value>
@@ -115,7 +219,7 @@ node_CityHash64(const Arguments& args) {
         hash = CityHash64WithSeeds(str, len, seed0, seed1);
     }
 
-    return scope.Close(stringify_hash(hash));
+    return scope.Close(objectify_hash(hash));
 }
 
 Handle<Value>
@@ -143,7 +247,7 @@ node_CityHash128(const Arguments& args) {
         hash = CityHash128(str, len);
     }
 
-    return scope.Close(stringify_hash(&hash));
+    return scope.Close(objectify_hash(hash));
 }
 
 Handle<Value>
@@ -171,12 +275,14 @@ node_CityHashCrc128(const Arguments& args) {
         hash = CityHashCrc128(str, len);
     }
 
-    return scope.Close(stringify_hash(&hash));
+    return scope.Close(objectify_hash(hash));
 }
 
 extern "C" void
 init (Handle<Object> target) {
     HandleScope scope;
+    target->Set(String::New("stringify"), FunctionTemplate::New(node_Stringify)->GetFunction());
+    target->Set(String::New("objectify"), FunctionTemplate::New(node_Objectify)->GetFunction());
     target->Set(String::New("hash64"), FunctionTemplate::New(node_CityHash64)->GetFunction());
     target->Set(String::New("hash128"), FunctionTemplate::New(node_CityHash128)->GetFunction());
     target->Set(String::New("crc128"), FunctionTemplate::New(node_CityHashCrc128)->GetFunction());
