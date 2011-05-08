@@ -75,6 +75,13 @@ Install Node-CityHash:
 	**/
 	function crc128(str, [seed0]);
 
+	/**
+	 * Compute hash crc for str by CityHashCrc256().
+	 * @param {string} str The string to compute hash.
+	 * @return {array} 4 64-bit hash object in an array, eg [hash1, hash2, hash3, hash4].
+	**/
+	function crc256(str);
+
 ### Usage ###
 
 	var cityhash = require('node-cityhash');
