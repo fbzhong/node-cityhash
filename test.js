@@ -33,6 +33,8 @@ function assertEqual(expected, actual, message) {
         }
         passed = false;
         console.log('[Error]' + message + 'Expected ' + JSON.stringify(expected) + ' , but actual is ' + JSON.stringify(actual));
+    } else {
+        console.log('[PASS] ' + message);
     }
 }
 
