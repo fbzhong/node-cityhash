@@ -22,10 +22,14 @@
 #include <string.h>
 #include <sstream>
 #include <city.h>
-#include <citycrc.h>
 
 #define MAX_64_HASH_LEN 21
 #define MAX_128_HASH_LEN MAX_64_HASH_LEN*2
+
+// weak symbols.
+extern uint128 CityHashCrc128(const char *s, size_t len) __attribute__((weak));
+extern uint128 CityHashCrc128WithSeed(const char *s, size_t len, uint128 seed) __attribute__((weak));
+extern void CityHashCrc256(const char *s, size_t len, uint64 *result) __attribute__((weak));
 
 using namespace v8;
 
@@ -74,7 +78,7 @@ to_uint128(uint128* v, const char* data, size_t len) {
     std::stringstream str;
     uint64 i;
 
-    char* sep = strchr(data, (int)',');
+    char* sep = strchr((char*)data, (int)',');
     if(sep == NULL) {
         str.write(data, len);
         str >> i;
@@ -172,7 +176,7 @@ objectify_hash(const String::AsciiValue &hash) {
     const char *data = *hash;
     size_t len = hash.length();
 
-    char *ch = strchr(data, ',');
+    char *ch = strchr((char*)data, ',');
     if(ch == NULL) {
         return objectify_hash(to_uint64(data, len));
     } else {
@@ -293,11 +297,17 @@ node_CityHashCrc128(const Arguments& args) {
     uint128 hash;
 
     if(args.Length() == 2) {
+        if(CityHashCrc128WithSeed == NULL) {
+            return ThrowException(String::New("CityHashCrc128WithSeed function does not found."));
+        }
+
         uint128 seed;
         to_uint128(&seed, args[1]);
-
         hash = CityHashCrc128WithSeed(str, len, seed);
     } else {
+        if(CityHashCrc128 == NULL) {
+            return ThrowException(String::New("CityHashCrc128 function does not found."));
+        }
         hash = CityHashCrc128(str, len);
     }
 
@@ -318,8 +328,13 @@ node_CityHashCrc256(const Arguments& args) {
     const char* str = *data;
     size_t len = data.length();
 
+    if(CityHashCrc256 == NULL) {
+        return ThrowException(String::New("CityHashCrc256 function does not found."));
+    }
+
     uint64 hashs[4];
     CityHashCrc256(str, len, hashs);
+
     return scope.Close(objectify_hashs(hashs, 4));
 }
 
