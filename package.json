@@ -1,19 +1,13 @@
 {
-    "name": "node-cityhash"
-    ,"version": "0.0.1"
-    ,"main": "./build/Release/cityhash"
-    ,"description": "NodeJS binding for Google CityHash."
-    ,"scripts" : { "install" : "./install.sh" }
-    ,"dependencies": []
-    ,"repositories": [{ "type": "git"
-    		   ,"path": "git://github.com/fbzhong/node-cityhash.git"
-    		  }]
-    ,"homepage": "http://github.com/fbzhong/node-cityhash"
-    ,"bugs": "http://github.com/fbzhong/node-cityhash/issues"
-    ,"maintainers": [{ "name": "Robin"
-    		  ,"email": "fbzhong@gmail.com"
-    		  ,"web": "http://github.com/fbzhong/"
-    		 }]
-    ,"licenses": [{ "type": "MIT" }]
-    ,"engine": "node"
+  "name": "cityhash",
+  "version": "0.0.2",
+  "main": "./build/Release/node-cityhash",
+  "description": "NodeJS binding for Google CityHash.",
+  "dependencies": [ ],
+  "repositories": [{ "type": "git", "path": "git://github.com/fbzhong/node-cityhash.git" }],
+  "homepage": "http://github.com/fbzhong/node-cityhash",
+  "bugs": "http://github.com/fbzhong/node-cityhash/issues",
+  "maintainers": [{ "name": "Robin", "email": "fbzhong@gmail.com", "web": "http://github.com/fbzhong/" }],
+  "contributors": [{ "name": "Frank Xu", "email": "yyfrankyy@gmail.com", "web": "http://github.com/yyfrankyy/" }],
+  "licenses": [{ "type": "MIT" }]
 }
