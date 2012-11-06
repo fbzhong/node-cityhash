@@ -21,15 +21,13 @@
 #include <v8.h>
 #include <string.h>
 #include <sstream>
-#include <city.h>
+#include "city.h"
+#ifdef __SSE4_2__
+#include "citycrc.h"
+#endif
 
 #define MAX_64_HASH_LEN 21
 #define MAX_128_HASH_LEN MAX_64_HASH_LEN*2
-
-// weak symbols.
-extern uint128 CityHashCrc128(const char *s, size_t len) __attribute__((weak));
-extern uint128 CityHashCrc128WithSeed(const char *s, size_t len, uint128 seed) __attribute__((weak));
-extern void CityHashCrc256(const char *s, size_t len, uint64 *result) __attribute__((weak));
 
 using namespace v8;
 
@@ -190,7 +188,7 @@ Local<Object>
 objectify_hashs(const uint64 hashs[], size_t size) {
     Local<Object> ret = Array::New(size);
 
-    for(int i=0; i<size; i++) {
+    for(size_t i=0; i<size; i++) {
         uint64 hash = hashs[i];
         ret->Set(i, objectify_hash(hash));
     }
@@ -284,6 +282,7 @@ node_CityHash128(const Arguments& args) {
 Handle<Value>
 node_CityHashCrc128(const Arguments& args) {
     HandleScope scope;
+#ifdef __SSE4_2__
 
     int args_len = args.Length();
     if(args_len == 0 || args_len > 2) {
@@ -312,13 +311,16 @@ node_CityHashCrc128(const Arguments& args) {
     }
 
     return scope.Close(objectify_hash(hash));
+#else
+    return ThrowException(String::New("SSE4.2 is not supported for your platform"));
+#endif
 }
 
 Handle<Value>
 node_CityHashCrc256(const Arguments& args) {
     HandleScope scope;
 
-    printf("handle");
+#ifdef __SSE4_2__
     int args_len = args.Length();
     if(args_len != 1) {
         return ThrowException(String::New("Invalid arguments."));
@@ -336,7 +338,22 @@ node_CityHashCrc256(const Arguments& args) {
     CityHashCrc256(str, len, hashs);
 
     return scope.Close(objectify_hashs(hashs, 4));
+#else
+    return ThrowException(String::New("SSE4.2 is not supported for your platform"));
+#endif
 }
+
+Handle<Value>
+node_isCrcSupported(const Arguments& args) {
+    HandleScope scope;
+
+#ifdef __SSE4_2__
+    return scope.Close(Boolean::New(true));
+#else
+    return scope.Close(Boolean::New(false));
+#endif
+}
+
 
 extern "C" void
 init (Handle<Object> target) {
@@ -347,4 +364,5 @@ init (Handle<Object> target) {
     target->Set(String::New("hash128"), FunctionTemplate::New(node_CityHash128)->GetFunction());
     target->Set(String::New("crc128"), FunctionTemplate::New(node_CityHashCrc128)->GetFunction());
     target->Set(String::New("crc256"), FunctionTemplate::New(node_CityHashCrc256)->GetFunction());
+    target->Set(String::New("isCrcSupported"), FunctionTemplate::New(node_isCrcSupported)->GetFunction());
 }

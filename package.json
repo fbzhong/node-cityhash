@@ -1,7 +1,7 @@
 {
     "name": "node-cityhash"
     ,"version": "0.0.1"
-    ,"main": "./build/default/cityhash"
+    ,"main": "./build/Release/cityhash"
     ,"description": "NodeJS binding for Google CityHash."
     ,"scripts" : { "install" : "./install.sh" }
     ,"dependencies": []

@@ -1,4 +1,4 @@
-var cityhash = require('./build/default/cityhash.node');
+var cityhash = require('./build/Release/node-cityhash.node');
 
 var passed = true;
 
@@ -170,6 +170,7 @@ assertEqual({
         "uint128": true
     }, cityhash.hash128('Hello', cityhash.objectify('12343,30293')), 'Hash128 for "Hello" with objectify seed 12343,30293');
 
+if (cityhash.isCrcSupported()) {
 assertEqual({
         "low": {
             "low": 68277041,
@@ -224,5 +225,5 @@ assertEqual({
 // since my computer does not support SSE4.2, can not calculate the CRC by CityHashCrc256 algorithm.
 // assertEqual({
 //     }, cityhash.crc256('Hello'), 'Crc256 for "Hello"');
-
+}
 end();
