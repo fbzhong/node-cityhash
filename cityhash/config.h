@@ -5,6 +5,8 @@
 /* #undef AC_APPLE_UNIVERSAL_BUILD */
 
 /* Define to 1 if the compiler supports __builtin_expect. */
+#define __SSE_4_2__ 1
+
 #define HAVE_BUILTIN_EXPECT 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
