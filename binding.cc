@@ -21,6 +21,7 @@
 #include <v8.h>
 #include <string.h>
 #include <sstream>
+#include <node_buffer.h>
 #include "city.h"
 #ifdef __SSE4_2__
 #include "citycrc.h"
@@ -30,6 +31,7 @@
 #define MAX_128_HASH_LEN MAX_64_HASH_LEN*2
 
 using namespace v8;
+using node::Buffer;
 
 inline uint32 Uint64High32(const uint64 &x) {
     return (uint32)((x >> 32) & 0xFFFFFFFF);
@@ -234,6 +236,12 @@ node_CityHash64(const Arguments& args) {
     String::Utf8Value data(args[0]->ToString());
     const char* str = *data;
     size_t len = data.length();
+
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
 
     uint64 hash;
 

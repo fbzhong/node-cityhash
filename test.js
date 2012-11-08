@@ -88,6 +88,15 @@ assertEqual({
         value: '15738392108067291633'
     }, cityhash.hash64('Hello', 87392039), 'Hash64 for "hello" with seed 87392039');
 
+var b = new Buffer(4)
+b.writeUInt32LE(7771789, 0)
+assertEqual({
+    low: 3883967176,
+    high: 3780832496,
+    uint64: true,
+    value:'16238551925858017992'
+    }, cityhash.hash64(b, "2310915232984335893"), 'Hash64 for Buffer');
+
 assertEqual({
         low: 2569634289,
         high: 3664379964,
