@@ -273,6 +273,12 @@ node_CityHash128(const Arguments& args) {
     const char* str = *data;
     size_t len = data.length();
 
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
+
     uint128 hash;
 
     if(args.Length() == 2) {
@@ -300,6 +306,12 @@ node_CityHashCrc128(const Arguments& args) {
     String::Utf8Value data(args[0]->ToString());
     const char* str = *data;
     size_t len = data.length();
+
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
 
     uint128 hash;
 
@@ -337,6 +349,12 @@ node_CityHashCrc256(const Arguments& args) {
     String::Utf8Value data(args[0]->ToString());
     const char* str = *data;
     size_t len = data.length();
+
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
 
     if(CityHashCrc256 == NULL) {
         return ThrowException(String::New("CityHashCrc256 function does not found."));
