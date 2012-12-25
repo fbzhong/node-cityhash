@@ -1,4 +1,4 @@
-var cityhash = require('./build/default/cityhash.node');
+var cityhash = require('./build/Release/node-cityhash.node');
 
 var passed = true;
 
@@ -88,6 +88,15 @@ assertEqual({
         value: '15738392108067291633'
     }, cityhash.hash64('Hello', 87392039), 'Hash64 for "hello" with seed 87392039');
 
+var b = new Buffer(4)
+b.writeUInt32LE(7771789, 0)
+assertEqual({
+    low: 3883967176,
+    high: 3780832496,
+    uint64: true,
+    value:'16238551925858017992'
+    }, cityhash.hash64(b, "2310915232984335893"), 'Hash64 for Buffer');
+
 assertEqual({
         low: 2569634289,
         high: 3664379964,
@@ -170,59 +179,60 @@ assertEqual({
         "uint128": true
     }, cityhash.hash128('Hello', cityhash.objectify('12343,30293')), 'Hash128 for "Hello" with objectify seed 12343,30293');
 
-assertEqual({
-        "low": {
-            "low": 68277041,
-            "high": 2127607426,
-            "value": "9138004313465017137",
-            "uint64": true
-        },
-        "high": {
-            "low": 3936042248,
-            "high": 2850538876,
-            "value": "12242971252332641544",
-            "uint64": true
-        },
-        "value": "9138004313465017137,12242971252332641544",
-        "uint128": true
-    }, cityhash.crc128('Hello'), 'Crc128 for "Hello"');
+if (cityhash.isCrcSupported()) {
+  assertEqual({
+          "low": {
+              "low": 68277041,
+              "high": 2127607426,
+              "value": "9138004313465017137",
+              "uint64": true
+          },
+          "high": {
+              "low": 3936042248,
+              "high": 2850538876,
+              "value": "12242971252332641544",
+              "uint64": true
+          },
+          "value": "9138004313465017137,12242971252332641544",
+          "uint128": true
+      }, cityhash.crc128('Hello'), 'Crc128 for "Hello"');
 
-assertEqual({
-        "low": {
-            "low": 3184066266,
-            "high": 3674042232,
-            "value": "15779891233746910938",
-            "uint64": true
-        },
-        "high": {
-            "low": 4196783977,
-            "high": 3519958761,
-            "value": "15118107765960464233",
-            "uint64": true
-        },
-        "value": "15779891233746910938,15118107765960464233",
-        "uint128": true
-    }, cityhash.crc128('Hello', '12343,30293'), 'Crc128 for "Hello" with seed 12343,30293');
+  assertEqual({
+          "low": {
+              "low": 3184066266,
+              "high": 3674042232,
+              "value": "15779891233746910938",
+              "uint64": true
+          },
+          "high": {
+              "low": 4196783977,
+              "high": 3519958761,
+              "value": "15118107765960464233",
+              "uint64": true
+          },
+          "value": "15779891233746910938,15118107765960464233",
+          "uint128": true
+      }, cityhash.crc128('Hello', '12343,30293'), 'Crc128 for "Hello" with seed 12343,30293');
 
-assertEqual({
-        "low": {
-            "low": 3184066266,
-            "high": 3674042232,
-            "value": "15779891233746910938",
-            "uint64": true
-        },
-        "high": {
-            "low": 4196783977,
-            "high": 3519958761,
-            "value": "15118107765960464233",
-            "uint64": true
-        },
-        "value": "15779891233746910938,15118107765960464233",
-        "uint128": true
-    }, cityhash.crc128('Hello', cityhash.objectify('12343,30293')), 'Crc128 for "Hello" with objectify seed 12343,30293');
+  assertEqual({
+          "low": {
+              "low": 3184066266,
+              "high": 3674042232,
+              "value": "15779891233746910938",
+              "uint64": true
+          },
+          "high": {
+              "low": 4196783977,
+              "high": 3519958761,
+              "value": "15118107765960464233",
+              "uint64": true
+          },
+          "value": "15779891233746910938,15118107765960464233",
+          "uint128": true
+      }, cityhash.crc128('Hello', cityhash.objectify('12343,30293')), 'Crc128 for "Hello" with objectify seed 12343,30293');
 
 // since my computer does not support SSE4.2, can not calculate the CRC by CityHashCrc256 algorithm.
 // assertEqual({
 //     }, cityhash.crc256('Hello'), 'Crc256 for "Hello"');
-
+}
 end();

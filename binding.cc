@@ -21,17 +21,17 @@
 #include <v8.h>
 #include <string.h>
 #include <sstream>
-#include <city.h>
+#include <node_buffer.h>
+#include "city.h"
+#ifdef __SSE4_2__
+#include "citycrc.h"
+#endif
 
 #define MAX_64_HASH_LEN 21
 #define MAX_128_HASH_LEN MAX_64_HASH_LEN*2
 
-// weak symbols.
-extern uint128 CityHashCrc128(const char *s, size_t len) __attribute__((weak));
-extern uint128 CityHashCrc128WithSeed(const char *s, size_t len, uint128 seed) __attribute__((weak));
-extern void CityHashCrc256(const char *s, size_t len, uint64 *result) __attribute__((weak));
-
 using namespace v8;
+using node::Buffer;
 
 inline uint32 Uint64High32(const uint64 &x) {
     return (uint32)((x >> 32) & 0xFFFFFFFF);
@@ -190,7 +190,7 @@ Local<Object>
 objectify_hashs(const uint64 hashs[], size_t size) {
     Local<Object> ret = Array::New(size);
 
-    for(int i=0; i<size; i++) {
+    for(size_t i=0; i<size; i++) {
         uint64 hash = hashs[i];
         ret->Set(i, objectify_hash(hash));
     }
@@ -237,6 +237,12 @@ node_CityHash64(const Arguments& args) {
     const char* str = *data;
     size_t len = data.length();
 
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
+
     uint64 hash;
 
     if(args_len == 1) {
@@ -267,6 +273,12 @@ node_CityHash128(const Arguments& args) {
     const char* str = *data;
     size_t len = data.length();
 
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
+
     uint128 hash;
 
     if(args.Length() == 2) {
@@ -284,6 +296,7 @@ node_CityHash128(const Arguments& args) {
 Handle<Value>
 node_CityHashCrc128(const Arguments& args) {
     HandleScope scope;
+#ifdef __SSE4_2__
 
     int args_len = args.Length();
     if(args_len == 0 || args_len > 2) {
@@ -293,6 +306,12 @@ node_CityHashCrc128(const Arguments& args) {
     String::Utf8Value data(args[0]->ToString());
     const char* str = *data;
     size_t len = data.length();
+
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
 
     uint128 hash;
 
@@ -312,13 +331,16 @@ node_CityHashCrc128(const Arguments& args) {
     }
 
     return scope.Close(objectify_hash(hash));
+#else
+    return ThrowException(String::New("SSE4.2 is not supported for your platform"));
+#endif
 }
 
 Handle<Value>
 node_CityHashCrc256(const Arguments& args) {
     HandleScope scope;
 
-    printf("handle");
+#ifdef __SSE4_2__
     int args_len = args.Length();
     if(args_len != 1) {
         return ThrowException(String::New("Invalid arguments."));
@@ -328,6 +350,12 @@ node_CityHashCrc256(const Arguments& args) {
     const char* str = *data;
     size_t len = data.length();
 
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
+
     if(CityHashCrc256 == NULL) {
         return ThrowException(String::New("CityHashCrc256 function does not found."));
     }
@@ -336,7 +364,22 @@ node_CityHashCrc256(const Arguments& args) {
     CityHashCrc256(str, len, hashs);
 
     return scope.Close(objectify_hashs(hashs, 4));
+#else
+    return ThrowException(String::New("SSE4.2 is not supported for your platform"));
+#endif
 }
+
+Handle<Value>
+node_isCrcSupported(const Arguments& args) {
+    HandleScope scope;
+
+#ifdef __SSE4_2__
+    return scope.Close(Boolean::New(true));
+#else
+    return scope.Close(Boolean::New(false));
+#endif
+}
+
 
 extern "C" void
 init (Handle<Object> target) {
@@ -347,4 +390,5 @@ init (Handle<Object> target) {
     target->Set(String::New("hash128"), FunctionTemplate::New(node_CityHash128)->GetFunction());
     target->Set(String::New("crc128"), FunctionTemplate::New(node_CityHashCrc128)->GetFunction());
     target->Set(String::New("crc256"), FunctionTemplate::New(node_CityHashCrc256)->GetFunction());
+    target->Set(String::New("isCrcSupported"), FunctionTemplate::New(node_isCrcSupported)->GetFunction());
 }
