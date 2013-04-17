@@ -225,6 +225,30 @@ node_Objectify(const Arguments& args) {
 }
 
 Handle<Value>
+node_CityHash32(const Arguments& args) {
+    HandleScope scope;
+
+    int args_len = args.Length();
+    if(args_len == 0 || args_len > 1) {
+        return ThrowException(String::New("Invalid arguments."));
+    }
+
+    String::Utf8Value data(args[0]->ToString());
+    const char* str = *data;
+    size_t len = data.length();
+
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
+
+    uint32 hash = CityHash32(str, len);
+
+    return scope.Close(objectify_hash(hash));
+}
+
+Handle<Value>
 node_CityHash64(const Arguments& args) {
     HandleScope scope;
 
@@ -386,6 +410,7 @@ init (Handle<Object> target) {
     HandleScope scope;
     target->Set(String::New("stringify"), FunctionTemplate::New(node_Stringify)->GetFunction());
     target->Set(String::New("objectify"), FunctionTemplate::New(node_Objectify)->GetFunction());
+    target->Set(String::New("hash32"), FunctionTemplate::New(node_CityHash32)->GetFunction());
     target->Set(String::New("hash64"), FunctionTemplate::New(node_CityHash64)->GetFunction());
     target->Set(String::New("hash128"), FunctionTemplate::New(node_CityHash128)->GetFunction());
     target->Set(String::New("crc128"), FunctionTemplate::New(node_CityHashCrc128)->GetFunction());

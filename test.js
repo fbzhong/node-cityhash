@@ -68,6 +68,13 @@ assertEqual({
             }}, cityhash.objectify('9138004313465017137,12242971252332641544'), 'Stringify for uint128 object');
 
 assertEqual({
+  "low": 2999840452,
+  "high": 0,
+  "value": "2999840452",
+  "uint64":true
+  }, cityhash.hash32('Hello'), "Hash32 for 'Hello'");
+
+assertEqual({
     low: 1727229466,
     high: 1535838579,
     uint64: true,
