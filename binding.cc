@@ -147,6 +147,17 @@ stringify_hash(Local<Object> obj) {
 }
 
 Local<Object>
+objectify_hash(const uint32 &hash) {
+    Local<Object> ret = Object::New();
+    ret->Set(String::New("low"), Integer::NewFromUnsigned(hash));
+    ret->Set(String::New("high"), Integer::NewFromUnsigned(0));
+    ret->Set(String::New("value"), stringify_hash(hash));
+    ret->Set(String::New("uint64"), Boolean::New(false));
+
+    return ret;
+}
+
+Local<Object>
 objectify_hash(const uint64 &hash) {
     uint32 low = Uint64Low32(hash);
     uint32 high = Uint64High32(hash);

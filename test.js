@@ -71,7 +71,7 @@ assertEqual({
   "low": 2999840452,
   "high": 0,
   "value": "2999840452",
-  "uint64":true
+  "uint64": false
   }, cityhash.hash32('Hello'), "Hash32 for 'Hello'");
 
 assertEqual({
