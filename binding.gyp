@@ -1,11 +1,11 @@
 {
 	"targets": [
 		{
-			"target_name": "node-cityhash",
+			"target_name": "cityhash",
 			"include_dirs": ["cityhash/"],
-			"dependencies": ["cityhash/cityhash.gyp:libcityhash"],
 			"sources": [
-				"binding.cc"
+				"binding.cc",
+				"cityhash/city.cc"
 			]
 		}
 	]
