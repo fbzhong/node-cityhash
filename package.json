@@ -4,6 +4,7 @@
   "main": "./build/Release/node-cityhash",
   "description": "NodeJS binding for Google CityHash.",
   "dependencies": [ ],
+  "scripts": { "test": "node test.js" },
   "repositories": [{ "type": "git", "path": "git://github.com/fbzhong/node-cityhash.git" }],
   "homepage": "http://github.com/fbzhong/node-cityhash",
   "bugs": "http://github.com/fbzhong/node-cityhash/issues",
