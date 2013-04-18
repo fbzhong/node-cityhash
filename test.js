@@ -1,4 +1,4 @@
-var cityhash = require('./build/Release/node-cityhash.node');
+var cityhash = require('./');
 
 var passed = true;
 

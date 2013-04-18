@@ -392,3 +392,5 @@ init (Handle<Object> target) {
     target->Set(String::New("crc256"), FunctionTemplate::New(node_CityHashCrc256)->GetFunction());
     target->Set(String::New("isCrcSupported"), FunctionTemplate::New(node_isCrcSupported)->GetFunction());
 }
+
+NODE_MODULE(cityhash, init)
