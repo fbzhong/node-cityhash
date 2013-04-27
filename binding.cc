@@ -42,7 +42,7 @@ inline uint32 Uint64Low32(const uint64 &x) {
 }
 
 inline uint64 HighLow32ToUint64(const uint32 &low, const uint32 &high) {
-    return ((uint64_t)low) + ((((uint64_t)high) << 32) & 0xFFFFFFFF00000000);
+    return ((uint64_t)low) + ((((uint64_t)high) << 32) & 0xFFFFFFFF00000000ll);
 }
 
 
