@@ -147,6 +147,17 @@ stringify_hash(Local<Object> obj) {
 }
 
 Local<Object>
+objectify_hash(const uint32 &hash) {
+    Local<Object> ret = Object::New();
+    ret->Set(String::New("low"), Integer::NewFromUnsigned(hash));
+    ret->Set(String::New("high"), Integer::NewFromUnsigned(0));
+    ret->Set(String::New("value"), stringify_hash(hash));
+    ret->Set(String::New("uint64"), Boolean::New(false));
+
+    return ret;
+}
+
+Local<Object>
 objectify_hash(const uint64 &hash) {
     uint32 low = Uint64Low32(hash);
     uint32 high = Uint64High32(hash);
@@ -222,6 +233,30 @@ node_Objectify(const Arguments& args) {
 
     String::AsciiValue obj(args[0]->ToString());
     return scope.Close(objectify_hash(obj));
+}
+
+Handle<Value>
+node_CityHash32(const Arguments& args) {
+    HandleScope scope;
+
+    int args_len = args.Length();
+    if(args_len == 0 || args_len > 1) {
+        return ThrowException(String::New("Invalid arguments."));
+    }
+
+    String::Utf8Value data(args[0]->ToString());
+    const char* str = *data;
+    size_t len = data.length();
+
+    if (Buffer::HasInstance(args[0])) {
+      Local<Object> obj = args[0]->ToObject();
+      str = Buffer::Data(obj);
+      len = Buffer::Length(obj);
+    }
+
+    uint32 hash = CityHash32(str, len);
+
+    return scope.Close(objectify_hash(hash));
 }
 
 Handle<Value>
@@ -386,6 +421,7 @@ init (Handle<Object> target) {
     HandleScope scope;
     target->Set(String::New("stringify"), FunctionTemplate::New(node_Stringify)->GetFunction());
     target->Set(String::New("objectify"), FunctionTemplate::New(node_Objectify)->GetFunction());
+    target->Set(String::New("hash32"), FunctionTemplate::New(node_CityHash32)->GetFunction());
     target->Set(String::New("hash64"), FunctionTemplate::New(node_CityHash64)->GetFunction());
     target->Set(String::New("hash128"), FunctionTemplate::New(node_CityHash128)->GetFunction());
     target->Set(String::New("crc128"), FunctionTemplate::New(node_CityHashCrc128)->GetFunction());

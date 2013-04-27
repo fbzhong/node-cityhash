@@ -41,6 +41,13 @@ npm install cityhash
     function stringify(obj);
 
     /**
+     * Compute hash for str by CityHash32().
+     * @param {string | Buffer} str The string to compute hash.
+     * @return {hash} 32-bit hash value.
+    **/
+    function hash32(str);
+
+    /**
      * Compute hash for str by CityHash64().
      * @param {string} str The string to compute hash.
      * @param {unsigned long long | string | 64-bit hash object} [seed0] The hash seed.
